@@ -171,12 +171,6 @@ public class CPedido {
         try (Connection conexion = objetoConexion.establecerConexion()) {
             DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
             
-            // First, delete existing rows to avoid duplicates
-            String deleteSQL = "DELETE FROM pedido";
-            try (PreparedStatement deleteStmt = conexion.prepareStatement(deleteSQL)) {
-                deleteStmt.executeUpdate();
-            }
-            
             // Now insert all rows from the table
             String insertSQL = "INSERT INTO pedido (nombre, cantidad, unidad, total) VALUES (?, ?, ?, ?)";
             try (PreparedStatement ps = conexion.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -206,6 +200,46 @@ public class CPedido {
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Error al enviar pedido: " + e.toString());
+        } finally {
+            objetoConexion.cerrarConexion();
+        }
+    }
+
+    public void guardarPedido(JTable jTable3) {
+        Database objetoConexion = new Database();
+        
+        try (Connection conexion = objetoConexion.establecerConexion()) {
+            DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+            
+            // Now insert all rows from the table
+            String insertSQL = "INSERT INTO pedido (nombre, cantidad, unidad, total) VALUES (?, ?, ?, ?)";
+            try (PreparedStatement ps = conexion.prepareStatement(insertSQL, Statement.RETURN_GENERATED_KEYS)) {
+                for (int i = 0; i < model.getRowCount(); i++) {
+                    String nombre = model.getValueAt(i, 0).toString();
+                    int cantidad = Integer.parseInt(model.getValueAt(i, 1).toString());
+                    String unidad = model.getValueAt(i, 2).toString();
+                    double total = Double.parseDouble(model.getValueAt(i, 3).toString());
+
+                    ps.setString(1, nombre);
+                    ps.setInt(2, cantidad);
+                    ps.setString(3, unidad);
+                    ps.setDouble(4, total);
+
+                    ps.executeUpdate();
+                    
+                    // Get the generated key (ID) and store it in the table model
+                    ResultSet generatedKeys = ps.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        int id = generatedKeys.getInt(1);
+                        model.setValueAt(id, i, 4); // Store ID in hidden column
+                    }
+                }
+            }
+            
+            JOptionPane.showMessageDialog(null, "Pedido guardado correctamente");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al guardar pedido: " + e.toString());
         } finally {
             objetoConexion.cerrarConexion();
         }

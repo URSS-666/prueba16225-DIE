@@ -993,7 +993,7 @@ private void incrementarNumero() {
         JTable tempTable = new JTable(tempModel);
         
         // Send the order with the properly structured table
-        objetoPedido.enviarPedido(tempTable);
+        objetoPedido.guardarPedido(tempTable);
         
         JOptionPane.showMessageDialog(null, "Pedido enviado con éxito");
     } catch (Exception e) {
@@ -1071,7 +1071,7 @@ private void incrementarNumero() {
         JTable tempTable = new JTable(tempModel);
         
         // Send the order with the properly structured table - forcing new persistent records
-        objetoPedido.enviarPedido(tempTable);
+        objetoPedido.guardarPedido(tempTable);
         
         // Show success message
         JOptionPane.showMessageDialog(null, "Pedido guardado con éxito en la base de datos");
